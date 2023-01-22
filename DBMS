@@ -1,5 +1,6 @@
 #! /usr/bin/bash
 path="/d/DBMS_project/DBMS_DBS/";
+#check connect
 select opt in "Create Database" "List Databases" "Connect To Databases" "Drop Database" "exit"
 do
 case $opt
