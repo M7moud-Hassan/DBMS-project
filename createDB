@@ -1,0 +1,23 @@
+#! /usr/bin/bash
+shopt -s extglob
+path="/d/DBMS_project/DBMS_DBS/";
+
+# check name database []
+
+case $1 in 
++([a-zA-Z])*([0-9]))
+cd $path
+if [ -d $1 ]
+then
+ echo "database exists"
+else
+mkdir $1
+echo "create database" $1
+fi
+;;
+*)
+echo "invalid database name"
+;;
+esac
+
+

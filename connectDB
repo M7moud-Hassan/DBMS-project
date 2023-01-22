@@ -1,0 +1,10 @@
+#! /usr/bin/bash
+path="/d/DBMS_project/DBMS_DBS/";
+cd $path
+if [ -d $1 ]
+then
+cd $1
+echo "connect to database "$1
+else
+echo "database not exists"
+fi
