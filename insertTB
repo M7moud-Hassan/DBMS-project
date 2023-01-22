@@ -1,0 +1,40 @@
+#! /usr/bin/bash
+shopt -s extglob
+checkType(){ #function
+case $1 in
++([0-9]))
+echo int
+;;
++([A-Za-z]))
+echo text
+;;
+#(([0-9]{2})-([0-9]{2})-([0-9]{4})))
+#echo date
+#;;
+*)
+echo null
+;;
+esac
+}
+record="";
+metadata=`cat .metadata | grep "asd@"` #asd2@3@id-int@name-text@birthdate-date
+arrIN=(${metadata//@/ })  #[asd,1,id-int,name-text] 
+nameTB=${arrIN[0]}
+numField=${arrIN[1]}
+x=0
+while [ $x -eq $numField ]
+do
+field=${arrIN[$(($x+2))]} #id-int
+arr2=(${field//-/ }); #[id,int]
+read -p "enter "${arr2[0]} f1 #ashdh
+result=$(checkType $f1)
+if [ $result == ${arr2[1]} ]
+then
+record+=$f1'#'
+x=$(( $x + 1 ))
+else
+echo "invalid datatype"
+fi
+done 
+echo $record >> $nameTB
+

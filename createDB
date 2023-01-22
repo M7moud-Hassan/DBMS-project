@@ -1,17 +1,17 @@
 #! /usr/bin/bash
 shopt -s extglob
-path="/d/DBMS_project/DBMS_DBS/";
 
-# check name database []
 
 case $1 in 
 +([a-zA-Z])*([0-9]))
-cd $path
+cd $pathP
 if [ -d $1 ]
 then
  echo "database exists"
 else
 mkdir $1
+cd $1
+touch .metadata
 echo "create database" $1
 fi
 ;;

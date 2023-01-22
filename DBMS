@@ -1,5 +1,6 @@
 #! /usr/bin/bash
-path="/d/DBMS_project/DBMS_DBS/";
+pathP="/d/DBMS_project/DBMS_DBS/";
+export pathP
 #check connect
 select opt in "Create Database" "List Databases" "Connect To Databases" "Drop Database" "exit"
 do
@@ -10,7 +11,7 @@ in
  createDB $dbname
 ;;
 "List Databases")
-ls $path
+ls $pathP
 ;;
 "Connect To Databases")
  read -p "enter database name " dbname
@@ -18,7 +19,8 @@ connectDB $dbname
 ;;
 "Drop Database")
 read -p "enter database name " dbname
-rm -R $path$dbname
+rm -R $pathP$dbname
+echo "drop database "$dbname
 ;;
 "exit")
 break;
@@ -26,6 +28,5 @@ break;
 *)
     echo "not nknow command"
     ;;
-
 esac
 done

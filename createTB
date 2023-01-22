@@ -1,0 +1,29 @@
+#! /usr/bin/bash
+shopt -s extglob
+record="";
+let num
+case $1 in
++([a-zA-Z])*([0-9]))
+if [ -f $1 ]
+then
+echo "table is exists"
+else
+touch $1;
+record+=$1
+read  -p "enter number fields" num;
+record+='@'$num
+x=0
+while [ $x != $num ]
+do
+read -p "enter name field "$x nameField;
+read -p "enter datatype field "$x datatype;
+record+='@'$nameField'-'$datatype 
+x=$(( $x + 1 ))
+done
+echo $record >> .metadata
+fi
+;;
+*)
+echo "invalid table name"
+;;
+esac
