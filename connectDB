@@ -22,6 +22,11 @@ echo "done"
 read -p "enter table name " tbname;
 insertTB $tbname
 ;;
+"Select From Table")
+read -p "enter table name " tbname;
+read -p "enter feilds to selct " fields;
+selectTB $tbname $fields;
+;;
 esac
 done
 else

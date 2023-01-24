@@ -1,0 +1,104 @@
+#! /usr/bin/bash
+metadata=`cat .metadata | grep "$1@"` #asd@3@id-int@name-text@address-text@id
+arrIN=(${metadata//@/ })  #[asd,3,id-int,name-text,address-text,id]
+declare -A arr;
+declare -A nums;
+if [ $2 == 'all' ]  # asd name  address   #     2    3 arr={2,3}
+then
+numField=${arrIN[1]};
+else
+numField=$(($#-1));
+index=0;
+z=0
+for var in "$@"
+do
+z=0;
+if [ $index == 0 ]
+then
+index=$(($index+1))
+continue;
+fi
+for y in "${arrIN[@]}"
+do
+if [[ $y =~ .*$var-.* ]]  #asd ^name- $id name djfj fjfjf 
+then
+ nums[$(($index-1))]=$(($z-1))
+ break;
+fi
+z=$(($z+1))
+done
+index=$(($index+1))
+done
+fi
+x=0;
+while [ $x != $numField ]
+do
+if [ $2 == 'all' ]
+then
+arr[$x]=`cut -d# -f$(($x+1)) asd`;
+else
+r=${nums[$x]};
+arr[$x]=`cut -d# -f$r asd`;
+fi
+x=$(($x+1))
+done
+
+echo +----------------------------------------------+
+header='|   ';
+if [ $2 == 'all' ]
+then
+ind=0;
+for y in "${arrIN[@]}"
+do
+if [ $ind == 0 ] || [ $ind == 1 ] || [ $ind == $(($numField+2)) ]
+then
+ind=$(($ind+1));
+continue;
+fi
+arr2=(${y//-/ }); #[addres-text]
+header+=${arr2[0]}'        |        '
+ind=$(($ind+1));
+done
+
+else 
+ind=0;
+for y in $@  #asd id name
+do
+if [ $ind == 0 ] 
+then
+ind=$(($ind+1));
+continue;
+fi
+header+=$y'        |        '
+done
+fi
+echo $header;
+echo +----------------------------------------------+
+declare -A rows;
+ind=0;
+indexRow=0;
+while [ $ind != ${#arr[@]} ]
+do
+indexRow=0;
+var=${arr[$ind]};
+arr2=(${var// / });
+while [ $indexRow != ${#arr2[@]} ]
+do
+if [ $ind == 0 ]
+then
+rows[$indexRow]='|         '${arr2[$indexRow]}'       |';
+else
+rows[$indexRow]+='         '${arr2[$indexRow]}'       |';
+fi
+indexRow=$(($indexRow+1))
+done
+ind=$(($ind+1))
+done
+
+ind=0;
+while [ $ind != ${#rows[@]} ]
+do
+echo ${rows[$ind]}
+echo +----------------------------------------------+
+ind=$(($ind+1))
+done

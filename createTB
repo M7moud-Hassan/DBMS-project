@@ -10,7 +10,7 @@ echo "table is exists"
 else
 touch $1;
 record+=$1
-read  -p "enter number fields" num;
+read  -p "enter number fields " num;
 record+='@'$num
 x=0
 while [ $x != $num ]
@@ -20,7 +20,18 @@ read -p "enter datatype field "$x datatype;
 record+='@'$nameField'-'$datatype 
 x=$(( $x + 1 ))
 done
-echo $record >> .metadata
+while [ true ]
+do
+read -p "enter primary key " primary;
+if [[ $record =~ .*$primary.* ]]
+then
+record=$record@$primary;
+echo $record >> .metadata;
+break;
+else
+echo 'invalid primary key'
+fi
+done
 fi
 ;;
 *)
