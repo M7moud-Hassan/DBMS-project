@@ -1,0 +1,31 @@
+#! /usr/bin/bash
+res=`ls $1`
+arr=(${res// / })
+numChar=`echo $2 | wc -c`;
+for i in "${arr[@]}"
+do
+w=`echo $i | wc -c`;
+if [ $numChar -lt $w ]
+then
+numChar=$w;
+fi
+done
+n=$(($numChar * 1));
+n=$(($n+1))
+n=$(($n+1-2))
+b=0;
+delemeter='';
+while [ $b != $n ]
+do
+delemeter+='-';
+b=$(($b+1))
+done
+header=$2#
+echo +$delemeter+
+echo $header | awk -F# -v w=$numChar '{for (i=1;i<NF;i++)printf("%*s |",w,$i); printf "\n"}' ;
+echo +$delemeter+
+for i in "${arr[@]}"
+do
+echo $i# | awk -F# -v w=$numChar '{for (i=1;i<NF;i++)printf("%*s |",w,$i); printf "\n"}' 
+echo +$delemeter+
+done

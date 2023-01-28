@@ -1,0 +1,66 @@
+#! /usr/bin/bash
+cd $pathP
+if [ -d $1 ]
+then
+cd $pathP$1
+select opt in "Create Table" "List Tables" "Drop Table" "Insert into Table" "Select From Table" "Delete From Table" "Update Table" "exit"
+do
+case $opt in 
+"Create Table")
+read -p "Type table name :" tbname;
+createTB $tbname
+;;
+"List Tables")
+p=`pwd`
+dislist $p tables
+;;
+"Drop Table")
+read -p "Type table name " tbname;
+rm  $tbname
+tbname=$tbname@
+n=`grep -n ^$tbname@ .metadata | cut -d: -f1`d;
+`sed -i $n .metadata`;
+echo "done"
+;;
+"Insert into Table")
+read -p "Type table name :" tbname;
+insertTB $tbname
+;;
+"Select From Table")
+read -p "Type table name :" tbname;
+if [ -f $tbname ]
+then
+read -p "Type columns to select :" fields;
+selectTB $tbname $fields;
+else
+echo table $tbname not exists
+fi
+;;
+"Delete From Table")
+if [ -f $tbname ]
+then
+read -p "Type table name : " tbname;
+read -p "Type columns condition : " fields;
+deleteTB $tbname $fields;
+else
+echo table $tbname not exists
+fi
+;;
+"Update Table")
+if [ -f $tbname ]
+then
+read -p "Type table name : " tbname;
+read -p "Type columns condition : " fields;
+updateTB $tbname $fields;
+else
+echo table $tbname not exists
+fi
+;;
+"exit")
+break;
+;;
+esac
+done
+else
+echo "database not exists"
+fi
