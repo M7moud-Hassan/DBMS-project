@@ -37,10 +37,11 @@ echo table $tbname not exists
 fi
 ;;
 "Delete From Table")
-if [ -f $tbname ]
-then
 read -p "Type table name : " tbname;
 read -p "Type columns condition : " fields;
+if [ -f $tbname ]
+then
+
 deleteTB $tbname $fields;
 else
 echo table $tbname not exists

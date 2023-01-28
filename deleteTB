@@ -2,5 +2,4 @@
 re=`condition $@;`
 var=`echo $re | sed -z 's/ /d;/g;'`d\;;
 `sed -i $var $1`
-
 # id = 2 ,id < 57 ,id >4858  ,name ="",name like "%%"
