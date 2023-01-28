@@ -1,0 +1,23 @@
+#! /usr/bin/bash
+shopt -s extglob
+
+
+case $1 in 
++([a-zA-Z])*([0-9]))
+cd $pathP
+if [ -d $1 ]
+then
+ echo "database name  exists"
+else
+mkdir $1
+cd $1
+touch .metadata
+echo "created database" $1
+fi
+;;
+*)
+echo "invalid database name"
+;;
+esac
+
+
