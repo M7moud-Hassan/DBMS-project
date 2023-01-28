@@ -1,0 +1,279 @@
+#! /usr/bin/bash
+metadata=`cat .metadata | grep "$1@"` #asd@3@id-int@name-text@address-text@id
+arrIN=(${metadata//@/ })  #[asd,3,id-int,name-text,address-text,id]
+declare -A arr;
+declare -A nums;
+declare -A nums2;
+declare -A res;
+numField=${arrIN[1]};
+index=0;
+z=0
+for var in "$@"
+do
+z=0;
+if [ $index == 0 ]
+then
+index=$(($index+1))
+continue;
+fi
+for y in "${arrIN[@]}"
+do
+if [[ $y =~ .*$var-.* ]]  #asd ^name- $id name djfj fjfjf 
+then
+ nums[$(($index-1))]=$(($z-1))
+ break;
+fi
+z=$(($z+1))
+done
+index=$(($index+1))
+done
+
+i=0;
+for var in "$@"
+do
+if [ $i == 0 ]
+then
+i=$(($i+1))
+continue;
+fi
+read -p "Type condition of "$var' : ' arr[$(($i-1))]
+i=$(($i+1))
+done
+index=0;
+i=0
+while [ $i  != ${#arr[@]} ]
+do
+var=${arr[$i]};
+arr2=(${var// / });
+if [[ ${arr2[0]} == '=' ]] || [[ ${arr2[0]} == 'a=' ]]
+then
+res0=`cut -d# -f${nums[$i]} $1 | grep -n "^${arr2[1]}$" | cut -d: -f1`
+if [[ ${#res[@]} == 0 ]]
+then
+res[$index]=$res0;
+index=$(($index+1))
+else
+arr3=(${res0// / });
+res2='';
+for k in "${arr3[@]}"
+do
+var1=`echo ${res[$(($index-1))]} | grep "$k" `;
+if [ ${#var1} != 0 ]
+then
+res2+=' '$k;
+fi
+done
+res[$(($index-1))]=$res2;
+fi
+else if [[ ${arr2[0]} == 'o=' ]]
+then
+res0=`cut -d# -f${nums[$i]} $1 | grep -n "^${arr2[1]}$" | cut -d: -f1`
+res[$index]=$res0;
+index=$(($index+1))
+
+else if [[ ${arr2[0]} == '>' ]] || [[ ${arr2[0]} == 'a>' ]]
+then
+con=${arr2[1]};
+res0=`cut -d# -f${nums[$i]} $1 | grep -n "" | awk -v awkvar=$con -F:  '$2 > awkvar' | cut -d: -f1`
+if [[ ${#res[@]} == 0 ]]
+then
+res[$index]=$res0;
+index=$(($index+1))
+else
+arr3=(${res0// / });
+res2='';
+for k in "${arr3[@]}"
+do
+var1=`echo ${res[$(($index-1))]} | grep "$k" `;
+if [ ${#var1} != 0 ]
+then
+res2+=' '$k;
+fi
+done
+res[$(($index-1))]=$res2;
+fi
+else if [[ ${arr2[0]} == 'o>' ]]
+then
+con=${arr2[1]};
+res0=`cut -d# -f${nums[$i]} $1 | grep -n "" | awk -v awkvar=$con -F:  '$2 > awkvar' | cut -d: -f1`
+res[$index]=$res0;
+index=$(($index+1))
+
+
+else if [[ ${arr2[0]} == '<' ]] || [[ ${arr2[0]} == 'a<' ]]
+then
+con=${arr2[1]};
+res0=`cut -d# -f${nums[$i]} $1 | grep -n "" | awk -v awkvar=$con -F:  '$2 < awkvar' | cut -d: -f1`
+if [[ ${#res[@]} == 0 ]]
+then
+res[$index]=$res0;
+index=$(($index+1))
+else
+arr3=(${res0// / });
+res2='';
+for k in "${arr3[@]}"
+do
+var1=`echo ${res[$(($index-1))]} | grep "$k" `;
+if [ ${#var1} != 0 ]
+then
+res2+=' '$k;
+fi
+done
+res[$(($index-1))]=$res2;
+fi
+else if [[ ${arr2[0]} == 'o<' ]]
+then
+con=${arr2[1]};
+res0=`cut -d# -f${nums[$i]} $1 | grep -n "" | awk -v awkvar=$con -F:  '$2 < awkvar' | cut -d: -f1`
+res[$index]=$res0;
+index=$(($index+1))
+
+
+else  if [[ ${arr2[0]} == 'like' ]] || [[ ${arr2[0]} == 'alike' ]]
+then
+res0=`cut -d# -f${nums[$i]} $1 | grep -n "${arr2[1]}" | cut -d: -f1`
+if [[ ${#res[@]} == 0 ]]
+then
+res[$index]=$res0;
+index=$(($index+1))
+else
+arr3=(${res0// / });
+res2='';
+for k in "${arr3[@]}"
+do
+var1=`echo ${res[$(($index-1))]} | grep "$k" `;
+if [ ${#var1} != 0 ]
+then
+res2+=' '$k;
+fi
+done
+res[$(($index-1))]=$res2;
+fi
+else if [[ ${arr2[0]} == 'olike' ]]
+then
+res0=`cut -d# -f${nums[$i]} $1 | grep -n "${arr2[1]}" | cut -d: -f1`
+res[$index]=$res0;
+index=$(($index+1))
+else
+if [[ ${arr2[0]} == '!=' ]] || [[ ${arr2[0]} == 'a!=' ]]
+then
+res0=`cut -d# -f${nums[$i]} $1 | grep -n -v "^${arr2[1]}$" | cut -d: -f1`
+if [[ ${#res[@]} == 0 ]]
+then
+res[$index]=$res0;
+index=$(($index+1))
+else
+arr3=(${res0// / });
+res2='';
+for k in "${arr3[@]}"
+do
+var1=`echo ${res[$(($index-1))]} | grep -v "$k" `;
+if [ ${#var1} != 0 ]
+then
+res2+=' '$k;
+fi
+done
+res[$(($index-1))]=$res2;
+fi
+fi
+fi
+fi 
+fi
+fi
+fi
+fi
+fi
+fi
+i=$(($i+1))
+done
+
+shopt -s extglob
+checkType(){ #function
+case $1 in
++([0-9]))
+echo int
+;;
++([A-Za-z])*([A-Za-z0-9]))
+echo text
+;;
++([0][1-9]|[12][0-9]|[3][01])-+([0][1-9]|[1][0-2])-[2,1][0-9][0-9][0-9]) #01,02---09 10,11,12,1
+echo date
+;;
+*)
+echo null
+;;
+esac
+}
+#res=`cut -d# -f$numf $1 | grep -n "^$condition$" | cut -d: -f1`
+#echo $res
+# id = 2 ,id < 57 ,id >4858  ,name ="",name like "%%"
+read -p "Type columns for update : " updateFields
+arr3=(${updateFields// / });
+
+index=0;
+z=1
+k=0
+while [ $k != ${#arr3[@]} ]
+do
+z=0;
+for y in "${arrIN[@]}"
+do
+if [[ $y =~ .*${arr3[$k]}-.* ]]  #asd ^name- $id name djfj fjfjf 
+then
+ nums2[$(($index))]=$(($z-1))
+ break;
+fi
+z=$(($z+1))
+done
+k=$(($k+1))
+index=$(($index+1))
+done
+primaryKey=${arrIN[$(($numField + 2))]};
+if [ ${#primaryKey} == 0 ]
+then
+primaryKey='@@@@@@@@@';
+fi
+index=$((${#arr3[@]}-1))
+for i in "${res[@]}"
+do
+var=`echo $i | sed -z 's/ /p;/g;'`p\;;
+k=$((${#nums2[@]}-1));
+while [ $k != -1 ]
+ do
+ var0=`sed -n $var $1`;
+ arrvar0=(${var0// / });
+ field=${arrIN[$((${nums2[$k]}+1))]} #id-int
+arr2=(${field//-/ }); #[id,int]
+ read -p "type new value of "${arr2[0]}' : ' val;
+if [ ${arr2[0]} == $primaryKey ]
+then
+ res=`cut -d# -f${nums2[$k]} $1 | grep $val |wc -l`
+
+ if [ $res != 0 ]
+ then
+ echo 'this value is exists';
+ continue;
+ fi
+fi
+result=$(checkType $val)
+if [ $result == ${arr2[1]} ]
+then
+m=0;
+while [[ $m != ${#arrvar0[@]} ]]
+ do
+ old=`echo ${arrvar0[$m]} | cut -d# -f${nums2[$k]}`;
+ con=s/$old/$val/\;;
+ new=`echo ${arrvar0[$m]} | sed $con`;
+ mm=`echo ${arrvar0[$m]} | sed 's/\#/\\#/;'`;
+ new=`echo $new | sed 's/\#/\\#/;'`;
+con=s/$mm/$new/\;;
+ `sed -i $con $1`;
+ m=$(($m+1))
+ done
+ else
+    echo "invalid datatype"
+    continue;
+fi
+k=$(($k-1))
+ done
+done

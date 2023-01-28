@@ -1,0 +1,195 @@
+#! /usr/bin/bash
+metadata=`cat .metadata | grep "$1@"` #asd@3@id-int@name-text@address-text@id
+arrIN=(${metadata//@/ })  #[asd,3,id-int,name-text,address-text,id]
+declare -A arr;
+declare -A nums;
+declare -A res;
+numField=$(($#-1));
+index=0;
+z=0
+for var in "$@"
+do
+z=0;
+if [ $index == 0 ]
+then
+index=$(($index+1))
+continue;
+fi
+for y in "${arrIN[@]}"
+do
+if [[ $y =~ .*$var-.* ]]  #asd ^name- $id name djfj fjfjf 
+then
+ nums[$(($index-1))]=$(($z-1))
+ break;
+fi
+z=$(($z+1))
+done
+index=$(($index+1))
+done
+
+i=0;
+for var in "$@"
+do
+if [ $i == 0 ]
+then
+i=$(($i+1))
+continue;
+fi
+read -p "Type condition of "$var' : ' arr[$(($i-1))] 
+i=$(($i+1))
+done
+index=0;
+i=0
+while [ $i  != ${#arr[@]} ]
+do
+var=${arr[$i]};
+arr2=(${var// / });
+if [[ ${arr2[0]} == '=' ]] || [[ ${arr2[0]} == 'a=' ]]
+then
+res0=`cut -d# -f${nums[$i]} $1 | grep -n "^${arr2[1]}$" | cut -d: -f1`
+if [[ ${#res[@]} == 0 ]]
+then
+res[$index]=$res0;
+index=$(($index+1))
+else
+arr3=(${res0// / });
+res2='';
+for k in "${arr3[@]}"
+do
+var1=`echo ${res[$(($index-1))]} | grep "$k" `;
+if [ ${#var1} != 0 ]
+then
+res2+=' '$k;
+fi
+done
+res[$(($index-1))]=$res2;
+fi
+else if [[ ${arr2[0]} == 'o=' ]]
+then
+res0=`cut -d# -f${nums[$i]} $1 | grep -n "^${arr2[1]}$" | cut -d: -f1`
+res[$index]=$res0;
+index=$(($index+1))
+
+else if [[ ${arr2[0]} == '>' ]] || [[ ${arr2[0]} == 'a>' ]]
+then
+con=${arr2[1]};
+res0=`cut -d# -f${nums[$i]} $1 | grep -n "" | awk -v awkvar=$con -F:  '$2 > awkvar' | cut -d: -f1`
+if [[ ${#res[@]} == 0 ]]
+then
+res[$index]=$res0;
+index=$(($index+1))
+else
+arr3=(${res0// / });
+res2='';
+for k in "${arr3[@]}"
+do
+var1=`echo ${res[$(($index-1))]} | grep "$k" `;
+if [ ${#var1} != 0 ]
+then
+res2+=' '$k;
+fi
+done
+res[$(($index-1))]=$res2;
+fi
+else if [[ ${arr2[0]} == 'o>' ]]
+then
+con=${arr2[1]};
+res0=`cut -d# -f${nums[$i]} $1 | grep -n "" | awk -v awkvar=$con -F:  '$2 > awkvar' | cut -d: -f1`
+res[$index]=$res0;
+index=$(($index+1))
+
+
+else if [[ ${arr2[0]} == '<' ]] || [[ ${arr2[0]} == 'a<' ]]
+then
+con=${arr2[1]};
+res0=`cut -d# -f${nums[$i]} $1 | grep -n "" | awk -v awkvar=$con -F:  '$2 < awkvar' | cut -d: -f1`
+if [[ ${#res[@]} == 0 ]]
+then
+res[$index]=$res0;
+index=$(($index+1))
+else
+arr3=(${res0// / });
+res2='';
+for k in "${arr3[@]}"
+do
+var1=`echo ${res[$(($index-1))]} | grep "$k" `;
+if [ ${#var1} != 0 ]
+then
+res2+=' '$k;
+fi
+done
+res[$(($index-1))]=$res2;
+fi
+else if [[ ${arr2[0]} == 'o<' ]]
+then
+con=${arr2[1]};
+res0=`cut -d# -f${nums[$i]} $1 | grep -n "" | awk -v awkvar=$con -F:  '$2 < awkvar' | cut -d: -f1`
+res[$index]=$res0;
+index=$(($index+1))
+
+
+else  if [[ ${arr2[0]} == 'like' ]] || [[ ${arr2[0]} == 'alike' ]]
+then
+res0=`cut -d# -f${nums[$i]} $1 | grep -n "${arr2[1]}" | cut -d: -f1`
+if [[ ${#res[@]} == 0 ]]
+then
+res[$index]=$res0;
+index=$(($index+1))
+else
+arr3=(${res0// / });
+res2='';
+for k in "${arr3[@]}"
+do
+var1=`echo ${res[$(($index-1))]} | grep "$k" `;
+if [ ${#var1} != 0 ]
+then
+res2+=' '$k;
+fi
+done
+res[$(($index-1))]=$res2;
+fi
+else if [[ ${arr2[0]} == 'olike' ]]
+then
+res0=`cut -d# -f${nums[$i]} $1 | grep -n "${arr2[1]}" | cut -d: -f1`
+res[$index]=$res0;
+index=$(($index+1))
+else
+
+
+if [[ ${arr2[0]} == '!=' ]] || [[ ${arr2[0]} == 'a!=' ]]
+then
+res0=`cut -d# -f${nums[$i]} $1 | grep -n -v "^${arr2[1]}$" | cut -d: -f1`
+if [[ ${#res[@]} == 0 ]]
+then
+res[$index]=$res0;
+index=$(($index+1))
+else
+arr3=(${res0// / });
+res2='';
+for k in "${arr3[@]}"
+do
+var1=`echo ${res[$(($index-1))]} | grep -v "$k" `;
+if [ ${#var1} != 0 ]
+then
+res2+=' '$k;
+fi
+done
+res[$(($index-1))]=$res2;
+fi
+fi
+fi 
+fi
+fi
+fi
+fi
+fi
+fi
+fi
+i=$(($i+1))
+done
+result='';
+for i in "${res[@]}"
+do
+result+=$i' ';
+done
+echo $result;

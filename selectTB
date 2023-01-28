@@ -1,0 +1,148 @@
+#! /usr/bin/bash
+metadata=`cat .metadata | grep "$1@"` #asd@3@id-int@name-text@address-text@id
+arrIN=(${metadata//@/ })  #[asd,3,id-int,name-text,address-text,id]
+declare -A arr;
+declare -A nums;
+if [ $2 == 'all' ]  # asd name  address   #     2    3 arr={2,3}
+then
+numField=${arrIN[1]};
+else
+numField=$(($#-1));
+index=0;
+z=0
+for var in "$@"
+do
+z=0;
+if [ $index == 0 ]
+then
+index=$(($index+1))
+continue;
+fi
+for y in "${arrIN[@]}"
+do
+if [[ $y =~ .*$var-.* ]]  #asd ^name- $id name djfj fjfjf 
+then
+ nums[$(($index-1))]=$(($z-1))
+ break;
+fi
+z=$(($z+1))
+done
+index=$(($index+1))
+done
+fi
+read -p "Type columns for condition : " conditionF;
+#  id name 
+con=`echo $conditionF | sed 's/ /_/g;'`; 
+if [ $con != 'no' ]
+then
+re=`condition $1 $conditionF`;
+lines=`echo $re | sed -z 's/ /p;/g;'`p\;;
+fi
+x=0;
+while [ $x != $numField ]
+do
+if [ $2 == 'all' ]
+then
+con=`echo $conditionF | sed 's/ /_/g;'`; 
+if [ $con != 'no' ]
+then
+if [ $lines == 'p;' ]
+then
+x=$(($x+1));
+continue;
+fi
+arr[$x]=`sed -n $lines $1 | cut -d# -f$(($x+1))  | sed -z 's/\n/,/g;'`;
+else
+arr[$x]=`cut -d# -f$(($x+1)) $1 | sed -z 's/\n/,/g;'`;
+fi
+else
+r=${nums[$x]};
+if [ $conditionF != 'no' ]
+then
+if [ $lines == 'p;' ]
+then
+x=$(($x+1));
+continue;
+fi
+arr[$x]=`sed -n $lines $1 | cut -d# -f$r   | sed -z 's/\n/,/g;'`;
+else
+arr[$x]=`cut -d# -f$r $1  | sed -z 's/\n/,/g;'`;
+fi
+fi
+x=$(($x+1))
+done
+header='';
+if [ $2 == 'all' ]
+then
+ind=0;
+for y in "${arrIN[@]}"
+do
+if [ $ind == 0 ] || [ $ind == 1 ] || [ $ind == $(($numField+2)) ]
+then
+ind=$(($ind+1));
+continue;
+fi
+arr2=(${y//-/ }); #[addres-text]
+header+=${arr2[0]}'#'
+ind=$(($ind+1));
+done
+
+else 
+ind=0;
+for y in $@  #asd id name
+do
+if [ $ind == 0 ] 
+then
+ind=$(($ind+1));
+continue;
+fi
+header+=$y'#'
+done
+fi
+
+declare -A rows;
+ind=0;
+indexRow=0;
+numChar=0;
+while [ $ind != ${#arr[@]} ]
+do
+indexRow=0;
+var=`echo ${arr[$ind]} | sed -z 's/ /_/g;'`;
+arr2=(${var//,/ });
+while [ $indexRow != ${#arr2[@]} ]
+do
+if [ $ind == 0 ]
+then
+rows[$indexRow]=`echo ${arr2[$indexRow]} | sed -z 's/_/ /g;'`'#';
+else
+rows[$indexRow]+=`echo ${arr2[$indexRow]} | sed -z 's/_/ /g;'`'#';
+fi
+w=`echo ${arr2[$indexRow]} | wc -c`;
+if [ $numChar -lt $w ]
+then
+numChar=$w;
+fi
+indexRow=$(($indexRow+1))
+done
+ind=$(($ind+1))
+done
+n=$(($numChar * $numField));
+n=$(($n+$numField))
+n=$(($n+$numField-2))
+b=0;
+delemeter='';
+while [ $b != $n ]
+do
+delemeter+='-';
+b=$(($b+1))
+done
+echo +$delemeter+
+echo $header | awk -F# -v w=$numChar '{for (i=1;i<NF;i++)printf("%*s |",w,$i); printf "\n"}' ;
+echo +$delemeter+
+ind=0;
+while [ $ind != ${#rows[@]} ]
+do
+echo ${rows[$ind]} | awk -F# -v w=$numChar '{for (i=1;i<NF;i++)printf("%*s |",w,$i); printf "\n"}' 
+echo +$delemeter+
+ind=$(($ind+1))
+done
